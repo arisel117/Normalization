@@ -63,7 +63,9 @@
 - 각 인스턴스를 독립적으로 정규화하므로, Batch Size에 영향을 받지 않음
   
 ## Layer Normalization
-- 추가 설명 필요
+- **데이터 포인트의 모든 피쳐를 대상으로 정규화**를 진행 (동일한 층의 뉴런간 정규화)
+- 주로 RNN, Transformer에서 사용됨
+- 입력 데이터 Size 및 Batch Size에 영향을 받지 않음
 
 ## Group Normalization
 - 추가 설명 필요
