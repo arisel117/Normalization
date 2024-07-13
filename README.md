@@ -39,6 +39,8 @@
 
 
 * * *
+[<img src="https://github.com/arisel117/Normalization/blob/main/Norm.PNG?raw=true">](https://arxiv.org/abs/1803.08494)
+* 이 때, N은 Batch Size, C는 Channel Size, (H, W)는 Spatial Size를 의미함, 각 방법론은 파란색 부분 만큼을 묶어서 연산하게됨
 
 ## 배치 정규화 (Batch Normalization)
 - 학습 과정에서 데이터가 신경망을 타고 흐르면서 레이어와 레이어 사이의 데이터 분포가 달라지는 현상이 발생함
@@ -60,16 +62,43 @@
 ## Instance Normalization
 - (1 Batch 단위의) **각 입력 인스턴스(데이터) 별로 정규화**를 진행
 - 주로 이미지 스타일 변환 모델에 사용됨
-- 각 인스턴스를 독립적으로 정규화하므로, Batch Size에 영향을 받지 않음
+- 각 인스턴스를 독립적으로 정규화하므로, Batch Size에 영향을 받지 않으나, Batch 내 다른 데이터와의 차이가 제거 될 수 있음
   
 ## Layer Normalization
 - **데이터 포인트의 모든 피쳐를 대상으로 정규화**를 진행 (동일한 층의 뉴런간 정규화)
 - 주로 RNN, Transformer에서 사용됨
 - 입력 데이터 Size 및 Batch Size에 영향을 받지 않음
+- CNN과 같은 모델에서는 성능이 떨어질 수 있음
 
-## Group Normalization
-- 추가 설명 필요
+## [Group Normalization](https://arxiv.org/abs/1803.08494)
+- **Channel Axis에서 일정 Group Size로 나누어 정규화**를 진행
+- Instance Normalization과 Layer Normalization을 적절히 섞어 Computer Vision 분야에서 보다 우수한 성능을 보임
+  - Group Size == 1 이면, Group Normalization == Layer Normalization이 됨
+  - Group Size == Channel Size 이면, Group Normalization == Instance Normalization이 됨
+- Batch Size에 영향을 받지 않음
 
+## [Weight Normalization](https://arxiv.org/abs/1602.07868)
+- Feature Activation을 정규화하는 것이 아니라, 레이어의 **Weight를 정규화**하는 방법
+- 평균을 0으로 보장해주지 못하기 떄문에, Mean-Only Batch Normalization과 함께 사용할 것이 권장됨
+- 관련 연구들
+  - [스펙트럼 정규화 (Spectral Normalization)](https://arxiv.org/abs/1802.05957) 
+    - GAN 학습시 Discriminator의 학습을 안정화고, Lipschitz Constant의 Tuning이 없이도 잘 작동하도록 도와주는 Weight Normalization 기법
+  - [Adaptive Instance Normalization (AdaIN)](https://arxiv.org/abs/1703.06868)
+    - content 와 style input 이 주어졌을 때, 두 입력의 평균과 분산을 style input과 동일하도록 조절하는 방법
 
+## [Weight Standardization](https://arxiv.org/abs/1903.10520)
+- Feature Activation을 정규화하는 것이 아니라, 레이어의 **가중치(Conv Filter)를 대상으로 정규화**하는 방법
+- Group Normalization이 작은 Batch Size에서 유용하지만, 큰 Batch Size에선 Batch Normalization의 성능에 미치지 못함
+- 큰 Batch Size에서 Mini-Batch Dependency를 완전히 제거하면서, 큰 Batch Size를 가지는 환경에서 Batch Normalization 보다 우수한 성능을 보임
+- Residual Networks 구조에서 효과적임
+
+## [Layer-wise Adaptive Rate Scaling (LARS)](https://arxiv.org/abs/1708.03888)
+- LR이 클때 학습 안정성을 분석하기 위해 Weights와 Gradient Update의 Normalization 비율을 측정해 작으면 학습이 불안정하고, 크면 학습이 이루어지지 않음을 발견함
+  Weight가 아닌 Layer마다 LR을 다르게 사용하고, Update되는 정도가 Weight Norm에 따라 달라지도록 하는 방법
+- 큰 Batch Size를 사용하면 작은 Batch Size를 사용 할 때보다 Epoch당 Iteration이 적어지게 되고, 이를 보완하기 위해 더 큰 LR(Learning Rate)를 사용하게 됨
+  그러나, 큰 LR을 이용하면 학습이 어려워지고, 초기 단계에서 모델이 발산(Gradient Exploding)하는 문제가 생길 수 있음
+  그래서 초기에는 작은 LR을 사용하고, 몇 Epoch동안에 Linear Scaling하는 Linear Scaling LR with Warm-up 방법이 사용되었으나, 여전히 Batch Size가 크면 높은 LR 때문에 학습이 제대로 이루어지지 않는 문제가 있음
+- 기존 방식들은 100 Epoch을 기준으로 학습시키면 어떤 방법을 사용해도 Baseline에 미치지 못했지만, Epoch을 늘리면 Baseline의 성능과 거의 유사해짐
+  **큰 배치를 사용하면 전체 데이터셋의 True Gradient와 유사해지므로 추가적인 이득이 있을것 같지만, 작은 배치를 사용했을때와 큰 차이가 없음**
 
 
